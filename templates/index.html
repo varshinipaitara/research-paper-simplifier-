@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Research Paper Simplifier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; min-height: 100vh; color: #1a1a1a; }
+    header { background: #ffffff; border-bottom: 1px solid #e5e5e5; padding: 1rem 2rem; display: flex; align-items: center; gap: 0.5rem; }
+    header h1 { font-size: 1.1rem; font-weight: 600; color: #1a1a1a; }
+    header span { font-size: 0.7rem; background: #f0f0f0; color: #555; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+    main { max-width: 680px; margin: 4rem auto; padding: 0 1.5rem; }
+    h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 0.6rem; color: #111; }
+    .sub { color: #888; margin-bottom: 2.5rem; font-size: 0.95rem; }
+    .upload-area { background: #fafafa; border: 1.5px dashed #ddd; border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1rem; }
+    #file-label { font-size: 0.95rem; color: #666; font-weight: 500; margin-bottom: 0.5rem; display: block; }
+    .upload-area input { display: block; margin: 1rem auto; font-size: 0.9rem; }
+    #file-name { margin-top: 0.5rem; color: #16a34a; font-weight: 500; font-size: 0.9rem; min-height: 1.2rem; }
+    #simplify-btn { background: #111; color: white; border: none; padding: 0.85rem 2rem; border-radius: 8px; font-size: 0.95rem; font-family: 'Inter', sans-serif; font-weight: 500; cursor: pointer; width: 100%; margin-top: 0.5rem; transition: background 0.2s; }
+    #simplify-btn:hover { background: #333; }
+    #simplify-btn:disabled { background: #ccc; cursor: not-allowed; }
+    #loading { display: none; text-align: center; padding: 2rem; color: #888; font-size: 0.9rem; font-weight: 500; }
+    .spinner { width: 28px; height: 28px; border: 2.5px solid #eee; border-top-color: #111; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.8rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #error { display: none; background: #fff5f5; border: 1px solid #fecaca; border-radius: 8px; padding: 0.9rem 1rem; color: #dc2626; margin-top: 1rem; font-size: 0.9rem; }
+    #result { display: none; margin-top: 2rem; background: #fafafa; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.8rem; }
+    #result h3 { margin-bottom: 1.2rem; font-size: 1rem; font-weight: 600; color: #111; }
+    .section { margin-bottom: 1.4rem; }
+    .section-title { font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: #999; margin-bottom: 0.4rem; }
+    .section-body { font-size: 0.95rem; color: #333; line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>PaperSimplify</h1>
+  <span>AI</span>
+</header>
+
+<main>
+  <h2>Understand any research paper in plain English.</h2>
+  <p class="sub">Upload a PDF and get a clear, jargon-free breakdown in seconds.</p>
+
+  <div class="upload-area">
+    <span id="file-label">📂 Click below to select your PDF</span>
+    <input type="file" id="file-input" accept=".pdf" />
+    <div id="file-name"></div>
+  </div>
+
+  <button id="simplify-btn">Simplify this paper →</button>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    Reading and simplifying your paper... please wait
+  </div>
+  <div id="error"></div>
+
+  <div id="result">
+    <h3>Here's what this paper says</h3>
+    <div id="result-content"></div>
+  </div>
+</main>
+
+<script>
+document.getElementById('file-input').addEventListener('change', function() {
+  if (this.files && this.files[0]) {
+    document.getElementById('file-name').textContent = '✓ ' + this.files[0].name;
+    document.getElementById('file-label').textContent = 'File ready:';
+  }
+});
+
+document.getElementById('simplify-btn').addEventListener('click', async function() {
+  var fileInput = document.getElementById('file-input');
+  var file = fileInput.files[0];
+
+  if (!file) {
+    alert('Please select a PDF file first!');
+    return;
+  }
+
+  var btn = document.getElementById('simplify-btn');
+  btn.disabled = true;
+  btn.textContent = 'Simplifying...';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('result').style.display = 'none';
+
+  var formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    var response = await fetch('/simplify', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = 'Simplify this paper →';
+
+    if (data.error) {
+      document.getElementById('error').textContent = '⚠ ' + data.error;
+      document.getElementById('error').style.display = 'block';
+    } else {
+      renderResult(data.result);
+      document.getElementById('result').style.display = 'block';
+    }
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = 'Simplify this paper →';
+    document.getElementById('error').textContent = '⚠ Something went wrong. Try again.';
+    document.getElementById('error').style.display = 'block';
+  }
+});
+
+function renderResult(text) {
+  var sections = [
+    { key: 'ABOUT:', label: 'About' },
+    { key: 'WHAT THEY DID:', label: 'What They Did' },
+    { key: 'WHAT THEY FOUND:', label: 'What They Found' },
+    { key: 'WHY IT MATTERS:', label: 'Why It Matters' },
+    { key: 'TERMS:', label: 'Terms Simplified' }
+  ];
+
+  var container = document.getElementById('result-content');
+  container.innerHTML = '';
+
+  sections.forEach(function(section, i) {
+    var start = text.indexOf(section.key);
+    if (start === -1) return;
+
+    var contentStart = start + section.key.length;
+    var end = text.length;
+
+    for (var j = i + 1; j < sections.length; j++) {
+      var nextStart = text.indexOf(sections[j].key);
+      if (nextStart > start) { end = nextStart; break; }
+    }
+
+    var content = text.slice(contentStart, end).trim();
+
+    var div = document.createElement('div');
+    div.className = 'section';
+    div.innerHTML = '<div class="section-title">' + section.label + '</div><div class="section-body">' + content.replace(/\n/g, '<br>') + '</div>';
+    container.appendChild(div);
+  });
+
+  if (container.innerHTML === '') {
+    container.innerHTML = '<div class="section-body">' + text.replace(/\n/g, '<br>') + '</div>';
+  }
+}
+</script>
+</body>
+</html>
