@@ -1,44 +1,50 @@
 # 📄 Research Paper Simplifier
 
-Upload any research paper (PDF) and get a plain English breakdown instantly.
+An AI-powered web app that simplifies any research paper into plain English. Upload a PDF and instantly get a jargon-free breakdown.
 
 ## What it does
-- Extracts text from uploaded PDF
-- Uses Claude AI to simplify the paper into 5 clear sections:
-  - What the study is about
-  - What they did (methodology)
-  - What they found (results)
-  - Why it matters
-  - Difficult terms explained
+Upload any research paper PDF and get a simple breakdown in 5 sections:
+- **About** — What the study is about
+- **What They Did** — Methodology in simple terms
+- **What They Found** — Key results
+- **Why It Matters** — Real world impact
+- **Terms Simplified** — Difficult words explained
 
 ## Tech Stack
-- **Backend:** Python + Flask
-- **AI:** Anthropic Claude API
-- **PDF Parsing:** pdfplumber
-- **Frontend:** HTML + CSS + Vanilla JS
+| Part | Tech |
+|---|---|
+| Backend | Python + Flask |
+| AI | Groq API (LLaMA 3.3 70B) |
+| PDF Parsing | pdfplumber |
+| Frontend | HTML + CSS + JavaScript |
+| Deployed on | Render |
 
-## Setup
+## Setup Locally
 
-1. Clone the repo
+1. Clone the repo:
+   ```
+   git clone https://github.com/varshinipaitara/research-paper-simplifier-.git
+   cd research-paper-simplifier-
+   ```
+
 2. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
-3. Set your API key:
+
+3. Get a free Groq API key at [console.groq.com](https://console.groq.com)
+
+4. Set the API key:
    ```
-   export ANTHROPIC_API_KEY=your_key_here
+   set GROQ_API_KEY=your_key_here
    ```
-4. Run the app:
+
+5. Run the app:
    ```
    python app.py
    ```
-5. Open `http://localhost:5000`
 
-## Deploy (Render)
-- Connect your GitHub repo on render.com
-- Set `ANTHROPIC_API_KEY` as an environment variable
-- Set start command: `python app.py`
-- Done — free hosting!
+6. Open `http://localhost:5000`
 
-## Screenshots
-(Add screenshots here after running)
+## Live Demo
+Check out the live app on Render!
